@@ -1,3 +1,3 @@
 #!/bin/bash
 
-g++ -std=c++11 viewer.cpp -lglut -lGL
+g++ -g -std=c++11 viewer.cpp -lglut -lGL -o viewer

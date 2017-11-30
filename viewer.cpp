@@ -47,9 +47,8 @@ void getMaxVals (const char *filename, FPValue &min, FPValue &max)
     // TODO: add other dimensions
     if (viewerDim == Dimension::D1)
     {
-      int posX;
       FPValue val;
-      fscanf (f, "%d %lf\n", &posX, &val);
+      fscanf (f, "%lf\n", &val);
 
       if (index == 0)
       {
@@ -95,13 +94,10 @@ void drawFile (const char *filename)
     // TODO: add other dimensions
     if (viewerDim == Dimension::D1)
     {
-      int posX;
       FPValue val;
-      fscanf (f, "%d %lf\n", &posX, &val);
+      fscanf (f, "%lf\n", &val);
 
-      //assert (index == posX);
-
-      glVertex2f (posX, val);
+      glVertex2f (index, val);
     }
   }
 
@@ -278,16 +274,19 @@ int main (int argc, char **argv)
   if (sizeX == 0)
   {
     printf ("Size is not set! Use --size-x.\n");
+    return 0;
   }
 
   if (sizeY == 0 && (viewerDim == Dimension::D2 || viewerDim == Dimension::D3))
   {
     printf ("Size is not set! Use --size-y.\n");
+    return 0;
   }
 
   if (sizeY == 0 && viewerDim == Dimension::D3)
   {
     printf ("Size is not set! Use --size-z.\n");
+    return 0;
   }
 
   if (viewerDim == Dimension::D1)
