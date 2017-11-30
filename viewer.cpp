@@ -1,8 +1,12 @@
 #include <cstdlib>
 #include <cmath>
 #include <GL/glut.h>
+#include <string>
+#include <cstring>
 
-#define VERSION 0.01
+#define FPValue double
+
+#define VERSION "0.01"
 
 enum class Mode : uint32_t
 {
@@ -14,9 +18,9 @@ enum class Mode : uint32_t
 enum class Dimension : uint32_t
 {
   NONE,
-  1D,
-  2D,
-  3D
+  D1,
+  D2,
+  D3
 };
 
 Mode viewerMode = Mode::NONE;
@@ -27,37 +31,87 @@ bool isAnimationMode = false;
 int sizeX = 0;
 int sizeY = 0;
 int sizeZ = 0;
+int totalCount = 0;
 bool isComplexMode = false;
 
-/* Sample func itself */
-float func(float x)
+void getMaxVals (const char *filename, FPValue &min, FPValue &max)
 {
-	return A*x*x;
+  FILE *f = fopen (filename, "r");
+
+  max = 0;
+  min = 0;
+
+  for (int index = 0; index < totalCount; ++index)
+  {
+    // TODO: add complex values case here
+    // TODO: add other dimensions
+    if (viewerDim == Dimension::D1)
+    {
+      int posX;
+      FPValue val;
+      fscanf (f, "%d %lf\n", &posX, &val);
+
+      if (index == 0)
+      {
+        min = val;
+      }
+
+      if (val > max)
+      {
+        max = val;
+      }
+      if (val < min)
+      {
+        min = val;
+      }
+    }
+  }
+
+  fclose (f);
 }
- 
-/* Function plotting func */
-void draw(float (* func)(float x), float x1, float x2, float y1, float y2, int N)
+
+void drawFile (const char *filename)
 {
-	float x, dx = 1.0/N;
- 
-	glPushMatrix(); /* GL_MODELVIEW is default */
- 
-	glScalef(1.0 / (x2 - x1), 1.0 / (y2 - y1), 1.0);
-	glTranslatef(-x1, -y1, 0.0);
-	glColor3f(1.0, 1.0, 1.0);
- 
-	glBegin(GL_LINE_STRIP);
- 
-	for(x = x1; x < x2; x += dx)
-	{
-		glVertex2f(x, func(x));
-	}
- 
-	glEnd();
- 
-	glPopMatrix();
-};
- 
+  FPValue max, min;
+  getMaxVals (filename, min, max);
+
+  FILE *f = fopen (filename, "r");
+
+  glPushMatrix(); /* GL_MODELVIEW is default */
+
+  // TODO: add other dims
+  if (viewerDim == Dimension::D1)
+  {
+    glScalef(1.0 / sizeX, 1.0 / (max - min), 1.0);
+    glTranslatef(0, - min, 0.0);
+    glColor3f(1.0, 1.0, 1.0);
+  }
+
+  glBegin(GL_LINE_STRIP);
+
+  for (int index = 0; index < totalCount; ++index)
+  {
+    // TODO: add complex values case here
+    // TODO: add other dimensions
+    if (viewerDim == Dimension::D1)
+    {
+      int posX;
+      FPValue val;
+      fscanf (f, "%d %lf\n", &posX, &val);
+
+      //assert (index == posX);
+
+      glVertex2f (posX, val);
+    }
+  }
+
+  glEnd();
+
+  glPopMatrix();
+
+  fclose (f);
+}
+
 /* Redrawing func */
 void redraw(void)
 {
@@ -65,23 +119,22 @@ void redraw(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
- 
-	draw(func, -3, 3, 0, 10, 10);
- 
+
+	drawFile (path.c_str ());
+
 	glutSwapBuffers();
-};
- 
+}
+
 /* Idle proc. Redisplays, if called. */
 void idle(void)
 {
-        A++;
 	glutPostRedisplay();
-};
- 
+}
+
 /* Key press processing */
 void key(unsigned char c, int x, int y)
 {
-  switch (key)
+  switch (c)
   {
     case 27:
     {
@@ -92,7 +145,7 @@ void key(unsigned char c, int x, int y)
     case ' ':
     {
       // Space: start/stop animation
-      if (viewerMode == Mode::Directory)
+      if (viewerMode == Mode::DIRECTORY)
       {
         isAnimationMode = !isAnimationMode;
       }
@@ -101,8 +154,8 @@ void key(unsigned char c, int x, int y)
     {
     }
   }
-};
- 
+}
+
 /* Window reashape */
 void reshape(int w, int h)
 {
@@ -111,23 +164,6 @@ void reshape(int w, int h)
   glLoadIdentity();
   glOrtho(0, 1, 0, 1, -1, 1);
   glMatrixMode(GL_MODELVIEW);
-};
-
-void loadSingleFile (const char *filename)
-{
-  FILE *f = fopen (filename, "r");
-
-  int totalCount = sizeX * sizeY * sizeZ;
-
-  for (int index = 0; i < totalCount; ++i)
-  {
-    if (viewerDim == Dimension::1D)
-    {
-      fscanf (f, "%d %f\n", 
-    }
-  }
-
-  fclose (f);
 }
 
 int main (int argc, char **argv)
@@ -165,6 +201,9 @@ int main (int argc, char **argv)
     }
     else if (strcmp (argv[i], "--dir") == 0)
     {
+      // TODO
+      printf ("Not implemented.\n");
+      return 0;
       ++i;
       path = std::string (argv[i]);
 
@@ -172,20 +211,29 @@ int main (int argc, char **argv)
     }
     else if (strcmp (argv[i], "--msec-per-frame") == 0)
     {
+      // TODO
+      printf ("Not implemented.\n");
+      return 0;
       ++i;
       msec = atoi (argv[i]);
     }
     else if (strcmp (argv[i], "--1d") == 0)
     {
-      viewerDim = Dimension::1D;
+      viewerDim = Dimension::D1;
     }
     else if (strcmp (argv[i], "--2d") == 0)
     {
-      viewerDim = Dimension::2D;
+      // TODO
+      printf ("Not implemented.\n");
+      return 0;
+      viewerDim = Dimension::D2;
     }
     else if (strcmp (argv[i], "--3d") == 0)
     {
-      viewerDim = Dimension::3D;
+      // TODO
+      printf ("Not implemented.\n");
+      return 0;
+      viewerDim = Dimension::D3;
     }
     else if (strcmp (argv[i], "--size-x") == 0)
     {
@@ -232,19 +280,31 @@ int main (int argc, char **argv)
     printf ("Size is not set! Use --size-x.\n");
   }
 
-  if (sizeY == 0 && (viewerDim == Dimension::2D || viewerDim == Dimension::3D))
+  if (sizeY == 0 && (viewerDim == Dimension::D2 || viewerDim == Dimension::D3))
   {
     printf ("Size is not set! Use --size-y.\n");
   }
 
-  if (sizeY == 0 && viewerDim == Dimension::3D)
+  if (sizeY == 0 && viewerDim == Dimension::D3)
   {
     printf ("Size is not set! Use --size-z.\n");
   }
 
+  if (viewerDim == Dimension::D1)
+  {
+    sizeY = 1;
+    sizeZ = 1;
+  }
+  else if (viewerDim == Dimension::D2)
+  {
+    sizeZ = 1;
+  }
+
+  totalCount = sizeX * sizeY * sizeZ;
+
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
   glutCreateWindow("fdtd3d-viewer");
- 
+
   /*
    * Register GLUT callbacks.
    */
@@ -252,12 +312,12 @@ int main (int argc, char **argv)
   glutKeyboardFunc(key);
   glutReshapeFunc(reshape);
   glutIdleFunc(idle);
- 
+
   /*
    * Init the GL state
    */
   glLineWidth(1.0);
- 
+
   /*
    * Main loop
    */
