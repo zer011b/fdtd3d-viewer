@@ -41,9 +41,6 @@ Settings::parseCmd (int argc, char **argv)
     }
     else if (strcmp (argv[i], "--dir") == 0)
     {
-      // TODO
-      printf ("Not implemented.\n");
-      return STATUS_FAIL;
       ++i;
       filePath = std::string (argv[i]);
 
@@ -51,9 +48,6 @@ Settings::parseCmd (int argc, char **argv)
     }
     else if (strcmp (argv[i], "--msec-per-frame") == 0)
     {
-      // TODO
-      printf ("Not implemented.\n");
-      return STATUS_FAIL;
       ++i;
       msec = atoi (argv[i]);
     }

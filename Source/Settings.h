@@ -51,7 +51,7 @@ public:
   Settings ()
     : viewerMode (Mode::NONE)
   , viewerDim (Dimension::NONE)
-  , msec (0)
+  , msec (1000)
   , sizeX (0)
   , sizeY (0)
   , sizeZ (0)
