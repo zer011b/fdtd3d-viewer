@@ -83,8 +83,10 @@ Viewer::drawFile (const char *filename)
   // TODO: add other dims
   if (settings.viewerDim == Dimension::D1)
   {
-    glScalef (1.0 / settings.sizeX, 1.0 / (max - min), 1.0);
-    glTranslatef (0, - min, 0.0);
+    FPValue scaleX = settings.sizeX * 0.05;
+    FPValue scaleY = (max - min) * 0.05;
+    glScalef (1.0 / (settings.sizeX + 2 * scaleX), 1.0 / (max - min + 2 * scaleY), 1.0);
+    glTranslatef (scaleX, - min + scaleY, 0.0);
     glColor3f (1.0, 1.0, 1.0);
   }
   else
