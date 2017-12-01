@@ -2,19 +2,13 @@
 #define SETTINGS_H
 
 #include <string>
+#include <vector>
 
 enum Status
 {
   STATUS_OK = 0,
   STATUS_OK_EXIT,
   STATUS_FAIL
-};
-
-enum class Mode
-{
-  NONE,
-  SINGLE_FILE,
-  DIRECTORY
 };
 
 enum class Dimension
@@ -29,10 +23,9 @@ class Settings
 {
 public:
 
-  Mode viewerMode;
   Dimension viewerDim;
 
-  std::string filePath;
+  std::vector<std::string> filePath;
 
   int msec;
 
@@ -49,8 +42,7 @@ public:
 public:
 
   Settings ()
-    : viewerMode (Mode::NONE)
-  , viewerDim (Dimension::NONE)
+    : viewerDim (Dimension::NONE)
   , msec (1000)
   , sizeX (0)
   , sizeY (0)

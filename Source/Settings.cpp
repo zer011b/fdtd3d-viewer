@@ -20,8 +20,7 @@ Settings::parseCmd (int argc, char **argv)
     else if (strcmp (argv[i], "--help") == 0)
     {
       printf ("fdtd3d viewer\n\nUsage:\n");
-      printf ("--file <path> : load single file\n");
-      printf ("--dir <dir> : load all files from directory\n");
+      printf ("--files <path>,<path>,<path>... : load file\n");
       printf ("--msec-per-frame <N> : display each file for <N> mseconds (0 by default, i.e. as fast as possible) \n");
       printf ("--1d\n");
       printf ("--2d\n");
@@ -32,19 +31,29 @@ Settings::parseCmd (int argc, char **argv)
       printf ("--complex-values\n");
       return STATUS_OK_EXIT;
     }
-    else if (strcmp (argv[i], "--file") == 0)
+    else if (strcmp (argv[i], "--files") == 0)
     {
       ++i;
-      filePath = std::string (argv[i]);
 
-      viewerMode = Mode::SINGLE_FILE;
-    }
-    else if (strcmp (argv[i], "--dir") == 0)
-    {
-      ++i;
-      filePath = std::string (argv[i]);
+      std::string files (argv[i]);
+      ASSERT (files.length () > 0);
 
-      viewerMode = Mode::DIRECTORY;
+      std::string singleFile ("");
+
+      for (int i = 0; i < files.length (); ++i)
+      {
+        if (files[i] == ',')
+        {
+          filePath.push_back (singleFile);
+          singleFile = std::string ("");
+        }
+        else
+        {
+          singleFile += files[i];
+        }
+      }
+
+      filePath.push_back (singleFile);
     }
     else if (strcmp (argv[i], "--msec-per-frame") == 0)
     {
@@ -101,9 +110,9 @@ Settings::parseCmd (int argc, char **argv)
     }
   }
 
-  if (viewerMode == Mode::NONE)
+  if (filePath.size () == 0)
   {
-    printf ("Mode is not set! Use --file or --dir.\n");
+    printf ("Files not specified! Use --files.\n");
     return STATUS_FAIL;
   }
 

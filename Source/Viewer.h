@@ -11,8 +11,6 @@ class Viewer
   static bool isAnimationMode;
   static int curFileIndex;
 
-  static std::vector<std::string> filenames;
-
   static FPValue initialMax;
   static FPValue initialMin;
 

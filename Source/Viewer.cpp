@@ -1,15 +1,12 @@
 #include "Viewer.h"
 
 #include <cstdlib>
-#include <dirent.h>
 #include <cmath>
 #include <GL/glut.h>
 #include <string>
 
 bool Viewer::isAnimationMode = false;
 int Viewer::curFileIndex = 0;
-
-std::vector<std::string> Viewer::filenames;
 
 FPValue Viewer::initialMax = 0.0;
 FPValue Viewer::initialMin = 0.0;
@@ -149,30 +146,6 @@ Viewer::init (int argc, char **argv)
 void
 Viewer::loop ()
 {
-  if (settings.viewerMode == Mode::SINGLE_FILE)
-  {
-    filenames.push_back (settings.filePath);
-  }
-  else if (settings.viewerMode == Mode::DIRECTORY)
-  {
-    DIR *d;
-    struct dirent *dir;
-
-    d = opendir (settings.filePath.c_str ());
-    ASSERT (d);
-
-    while ((dir = readdir (d)) != NULL)
-    {
-      filenames.push_back (settings.filePath + std::string (dir->d_name));
-    }
-
-    closedir(d);
-  }
-  else
-  {
-    UNREACHABLE;
-  }
-
   curFileIndex = 0;
 
   glutMainLoop();
@@ -189,7 +162,7 @@ Viewer::redraw ()
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
 
-	drawFile (filenames[curFileIndex].c_str ());
+	drawFile (settings.filePath[curFileIndex].c_str ());
 
 	glutSwapBuffers ();
 
@@ -222,10 +195,7 @@ Viewer::key (unsigned char c, int x, int y)
     case ' ':
     {
       // Space: start/stop animation
-      if (settings.viewerMode == Mode::DIRECTORY)
-      {
-        isAnimationMode = !isAnimationMode;
-      }
+      isAnimationMode = !isAnimationMode;
     }
     default:
     {
@@ -253,7 +223,7 @@ Viewer::timer (int value)
   {
     ++curFileIndex;
 
-    if (curFileIndex == filenames.size ())
+    if (curFileIndex == settings.filePath.size ())
     {
       curFileIndex = 0;
     }
