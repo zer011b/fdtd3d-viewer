@@ -55,6 +55,33 @@ Settings::parseCmd (int argc, char **argv)
 
       filePath.push_back (singleFile);
     }
+    else if (strcmp (argv[i], "--file-list") == 0)
+    {
+      ++i;
+
+      char *line = NULL;
+      size_t len = 0;
+      ssize_t read;
+
+      FILE *fp = fopen (argv[i], "r");
+      if (fp == NULL)
+      {
+        return STATUS_FAIL;
+      }
+
+      while ((read = getline (&line, &len, fp)) != -1)
+      {
+        line[read - 1] = '\0';
+        filePath.push_back (std::string (line));
+      }
+
+      fclose (fp);
+
+      if (line)
+      {
+        free (line);
+      }
+    }
     else if (strcmp (argv[i], "--msec-per-frame") == 0)
     {
       ++i;
