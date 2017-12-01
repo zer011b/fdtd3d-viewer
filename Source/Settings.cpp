@@ -12,23 +12,20 @@ Settings::parseCmd (int argc, char **argv)
 
   for (int i = 1; i < argc; ++i)
   {
-    if (strcmp (argv[i], "--version") == 0)
+    if (strcmp (argv[i], "--help") == 0)
     {
-      printf ("fdtd3d viewer. Version " VERSION ". See --help for details.\n");
-      return STATUS_OK_EXIT;
-    }
-    else if (strcmp (argv[i], "--help") == 0)
-    {
-      printf ("fdtd3d viewer\n\nUsage:\n");
-      printf ("--files <path>,<path>,<path>... : load file\n");
-      printf ("--msec-per-frame <N> : display each file for <N> mseconds (0 by default, i.e. as fast as possible) \n");
-      printf ("--1d\n");
+      printf ("fdtd3d viewer. Version " VERSION ".\n\nUsage:\n");
+      printf ("--files <path>,<path>,<path>...: load files from comma-separated list\n");
+      printf ("--file-list <path>: load files from file <path>");
+      printf ("--msec-per-frame <N>: display each file for <N> mseconds (1000 by default) \n");
+      printf ("--1d: load one-dimensional files\n");
       printf ("--2d\n");
       printf ("--3d\n");
       printf ("--size-x <N>\n");
       printf ("--size-y <N>\n");
       printf ("--size-z <N>\n");
       printf ("--complex-values\n");
+      printf ("--initial-scale\n");
       return STATUS_OK_EXIT;
     }
     else if (strcmp (argv[i], "--files") == 0)

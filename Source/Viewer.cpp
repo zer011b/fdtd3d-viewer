@@ -137,7 +137,6 @@ Viewer::init (int argc, char **argv)
   glutKeyboardFunc (key);
   glutReshapeFunc (reshape);
   glutIdleFunc (idle);
-  glutTimerFunc (settings.msec, timer, 0);
 }
 
 /*
@@ -147,6 +146,9 @@ void
 Viewer::loop ()
 {
   curFileIndex = 0;
+
+  glutTimerFunc (settings.msec, timer, 0);
+  getMaxVals (settings.filePath[0].c_str (), initialMin, initialMax);
 
   glutMainLoop();
 }
