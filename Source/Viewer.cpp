@@ -11,6 +11,8 @@ int Viewer::curFileIndex = 0;
 FPValue Viewer::initialMax = 0.0;
 FPValue Viewer::initialMin = 0.0;
 
+int Viewer::directionMultiplier = 1;
+
 void
 Viewer::getMaxVals (const char *filename, FPValue &min, FPValue &max)
 {
@@ -200,6 +202,13 @@ Viewer::key (unsigned char c, int x, int y)
     {
       // Space: start/stop animation
       isAnimationMode = !isAnimationMode;
+      break;
+    }
+    case 'r':
+    {
+      // Reverse direction
+      directionMultiplier = - directionMultiplier;
+      break;
     }
     default:
     {
@@ -225,11 +234,15 @@ Viewer::timer (int value)
 {
   if (isAnimationMode)
   {
-    ++curFileIndex;
+    curFileIndex += directionMultiplier;
 
     if (curFileIndex == settings.filePath.size ())
     {
       curFileIndex = 0;
+    }
+    else if (curFileIndex == -1)
+    {
+      curFileIndex = settings.filePath.size () - 1;
     }
   }
 

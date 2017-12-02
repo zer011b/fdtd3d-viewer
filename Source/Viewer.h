@@ -14,6 +14,8 @@ class Viewer
   static FPValue initialMax;
   static FPValue initialMin;
 
+  static int directionMultiplier;
+
 private:
 
   static void getMaxVals (const char *, FPValue &, FPValue &);
