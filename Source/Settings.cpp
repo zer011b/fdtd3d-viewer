@@ -26,6 +26,11 @@ Settings::parseCmd (int argc, char **argv)
       printf ("--size-z <N>\n");
       printf ("--complex-values\n");
       printf ("--initial-scale\n");
+
+      printf ("\nSpecial keys:\n");
+      printf ("  Space - start/stop animation\n");
+      printf ("  'r' - reverse animation direction\n");
+      printf ("  Esc - exit\n");
       return STATUS_OK_EXIT;
     }
     else if (strcmp (argv[i], "--files") == 0)
@@ -82,7 +87,7 @@ Settings::parseCmd (int argc, char **argv)
     else if (strcmp (argv[i], "--msec-per-frame") == 0)
     {
       ++i;
-      msec = atoi (argv[i]);
+      msec = STOI (argv[i]);
     }
     else if (strcmp (argv[i], "--1d") == 0)
     {
@@ -105,17 +110,17 @@ Settings::parseCmd (int argc, char **argv)
     else if (strcmp (argv[i], "--size-x") == 0)
     {
       ++i;
-      sizeX = atoi (argv[i]);
+      sizeX = STOI (argv[i]);
     }
     else if (strcmp (argv[i], "--size-y") == 0)
     {
       ++i;
-      sizeY = atoi (argv[i]);
+      sizeY = STOI (argv[i]);
     }
     else if (strcmp (argv[i], "--size-z") == 0)
     {
       ++i;
-      sizeZ = atoi (argv[i]);
+      sizeZ = STOI (argv[i]);
     }
     else if (strcmp (argv[i], "--complex-values") == 0)
     {

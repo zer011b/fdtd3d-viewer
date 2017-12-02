@@ -30,4 +30,7 @@
 #define FPMOD "%llf"
 #endif
 
+#define STOI(str) std::stoi (str)
+#define STOF(str) std::stof (str)
+
 #endif /* !ASSERT_H */
