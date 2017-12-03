@@ -141,7 +141,7 @@ Settings::parseCmd (int argc, char **argv)
 
   if (filePath.size () == 0)
   {
-    printf ("Files not specified! Use --files.\n");
+    printf ("Files not specified! Use --files or --file-list.\n");
     return STATUS_FAIL;
   }
 

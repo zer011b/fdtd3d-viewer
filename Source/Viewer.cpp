@@ -210,6 +210,10 @@ Viewer::key (unsigned char c, int x, int y)
       directionMultiplier = - directionMultiplier;
       break;
     }
+    case 'c':
+    {
+      curFileIndex = 0;
+    }
     default:
     {
     }
