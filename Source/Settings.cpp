@@ -16,7 +16,9 @@ Settings::parseCmd (int argc, char **argv)
     {
       printf ("fdtd3d viewer. Version " VERSION ".\n\nUsage:\n");
       printf ("--files <path>,<path>,<path>...: load files from comma-separated list\n");
+      printf ("--files1 <path>,<path>,<path>...: load files from comma-separated list\n");
       printf ("--file-list <path>: load files from file <path>");
+      printf ("--file-list1 <path>: load files from file <path>");
       printf ("--msec-per-frame <N>: display each file for <N> mseconds (1000 by default) \n");
       printf ("--1d: load one-dimensional files\n");
       printf ("--2d\n");
@@ -57,6 +59,30 @@ Settings::parseCmd (int argc, char **argv)
 
       filePath.push_back (singleFile);
     }
+    else if (strcmp (argv[i], "--files1") == 0)
+    {
+      ++i;
+
+      std::string files (argv[i]);
+      ASSERT (files.length () > 0);
+
+      std::string singleFile ("");
+
+      for (int i = 0; i < files.length (); ++i)
+      {
+        if (files[i] == ',')
+        {
+          filePath1.push_back (singleFile);
+          singleFile = std::string ("");
+        }
+        else
+        {
+          singleFile += files[i];
+        }
+      }
+
+      filePath1.push_back (singleFile);
+    }
     else if (strcmp (argv[i], "--file-list") == 0)
     {
       ++i;
@@ -75,6 +101,33 @@ Settings::parseCmd (int argc, char **argv)
       {
         line[read - 1] = '\0';
         filePath.push_back (std::string (line));
+      }
+
+      fclose (fp);
+
+      if (line)
+      {
+        free (line);
+      }
+    }
+    else if (strcmp (argv[i], "--file-list1") == 0)
+    {
+      ++i;
+
+      char *line = NULL;
+      size_t len = 0;
+      ssize_t read;
+
+      FILE *fp = fopen (argv[i], "r");
+      if (fp == NULL)
+      {
+        return STATUS_FAIL;
+      }
+
+      while ((read = getline (&line, &len, fp)) != -1)
+      {
+        line[read - 1] = '\0';
+        filePath1.push_back (std::string (line));
       }
 
       fclose (fp);
@@ -132,6 +185,14 @@ Settings::parseCmd (int argc, char **argv)
     {
       doUseInitialScale = true;
     }
+    else if (strcmp (argv[i], "--manual-scale") == 0)
+    {
+      doUseManualScale = true;
+      ++i;
+      min = STOF (argv[i]);
+      ++i;
+      max = STOF (argv[i]);
+    }
     else
     {
       printf ("unknown option %s\n", argv[i]);
@@ -142,6 +203,12 @@ Settings::parseCmd (int argc, char **argv)
   if (filePath.size () == 0)
   {
     printf ("Files not specified! Use --files or --file-list.\n");
+    return STATUS_FAIL;
+  }
+
+  if (filePath1.size () > 0 && filePath1.size () != filePath.size ())
+  {
+    printf ("--files1 or --file-list1 should match --file or --file-list by count\n");
     return STATUS_FAIL;
   }
 

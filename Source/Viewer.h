@@ -14,11 +14,15 @@ class Viewer
   static FPValue initialMax;
   static FPValue initialMin;
 
+  static FPValue currentMax;
+  static FPValue currentMin;
+
   static int directionMultiplier;
 
 private:
 
   static void getMaxVals (const char *, FPValue &, FPValue &);
+  static void scale ();
 
 public:
 
@@ -29,7 +33,8 @@ public:
   static void reshape (int, int);
   static void timer (int);
 
-  static void drawFile (const char *);
+  static void drawFile (const char *, FPValue, FPValue, FPValue);
+  static void drawAxes ();
   static void init (int, char **);
   static void loop ();
 };

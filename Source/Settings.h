@@ -26,6 +26,7 @@ public:
   Dimension viewerDim;
 
   std::vector<std::string> filePath;
+  std::vector<std::string> filePath1;
 
   int msec;
 
@@ -39,6 +40,10 @@ public:
 
   bool doUseInitialScale;
 
+  bool doUseManualScale;
+  FPValue min;
+  FPValue max;
+
 public:
 
   Settings ()
@@ -50,6 +55,9 @@ public:
   , totalCount (0)
   , isComplexMode (false)
   , doUseInitialScale (false)
+  , doUseManualScale (false)
+  , min (0.0)
+  , max (0.0)
   {
   }
 

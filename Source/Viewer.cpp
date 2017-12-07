@@ -11,15 +11,18 @@ int Viewer::curFileIndex = 0;
 FPValue Viewer::initialMax = 0.0;
 FPValue Viewer::initialMin = 0.0;
 
+FPValue Viewer::currentMax = 0.0;
+FPValue Viewer::currentMin = 0.0;
+
 int Viewer::directionMultiplier = 1;
 
 void
-Viewer::getMaxVals (const char *filename, FPValue &min, FPValue &max)
+Viewer::getMaxVals (const char *filename, FPValue &out_min, FPValue &out_max)
 {
   FILE *f = fopen (filename, "r");
 
-  max = 0;
-  min = 0;
+  FPValue max = 0;
+  FPValue min = 0;
 
   for (int index = 0; index < settings.totalCount; ++index)
   {
@@ -37,6 +40,7 @@ Viewer::getMaxVals (const char *filename, FPValue &min, FPValue &max)
       if (index == 0)
       {
         min = val;
+        max = val;
       }
 
       if (val > max)
@@ -54,47 +58,28 @@ Viewer::getMaxVals (const char *filename, FPValue &min, FPValue &max)
     }
   }
 
-  if (curFileIndex == 0)
+  if (min < out_min)
   {
-    initialMin = min;
-    initialMax = max;
+    out_min = min;
+  }
+  if (max < out_max)
+  {
+    out_max = max;
   }
 
   fclose (f);
 }
 
 void
-Viewer::drawFile (const char *filename)
+Viewer::drawFile (const char *filename, FPValue red, FPValue green, FPValue blue)
 {
-  FPValue max, min;
-
-  if (settings.doUseInitialScale)
-  {
-    min = initialMin;
-    max = initialMax;
-  }
-  else
-  {
-    getMaxVals (filename, min, max);
-  }
-
   FILE *f = fopen (filename, "r");
 
   glPushMatrix (); /* GL_MODELVIEW is default */
 
-  // TODO: add other dims
-  if (settings.viewerDim == Dimension::D1)
-  {
-    FPValue scaleX = settings.sizeX * 0.05;
-    FPValue scaleY = (max - min) * 0.05;
-    glScalef (1.0 / (settings.sizeX + 2 * scaleX), 1.0 / (max - min + 2 * scaleY), 1.0);
-    glTranslatef (scaleX, - min + scaleY, 0.0);
-    glColor3f (1.0, 1.0, 1.0);
-  }
-  else
-  {
-    UNREACHABLE;
-  }
+  scale ();
+
+  glColor3f (red, green, blue);
 
   glBegin (GL_LINE_STRIP);
 
@@ -152,9 +137,64 @@ Viewer::loop ()
   curFileIndex = 0;
 
   glutTimerFunc (settings.msec, timer, 0);
-  getMaxVals (settings.filePath[0].c_str (), initialMin, initialMax);
+
+  getMaxVals (settings.filePath[0].c_str (), currentMin, currentMax);
+  if (!settings.filePath1.empty ())
+  {
+    getMaxVals (settings.filePath1[0].c_str (), currentMin, currentMax);
+  }
+
+  if (settings.doUseManualScale)
+  {
+    currentMin = settings.min;
+    currentMax = settings.max;
+  }
+
+  initialMin = currentMin;
+  initialMax = currentMax;
 
   glutMainLoop();
+}
+
+void
+Viewer::scale ()
+{
+  // TODO: add other dims
+  if (settings.viewerDim == Dimension::D1)
+  {
+    FPValue scaleX = settings.sizeX * 0.05;
+    FPValue scaleY = (currentMax - currentMin) * 0.05;
+    glScalef (1.0 / (settings.sizeX + 2 * scaleX), 1.0 / (currentMax - currentMin + 2 * scaleY), 1.0);
+    glTranslatef (scaleX, - currentMin + scaleY, 0.0);
+  }
+  else
+  {
+    UNREACHABLE;
+  }
+}
+
+void
+Viewer::drawAxes ()
+{
+  glPushMatrix (); /* GL_MODELVIEW is default */
+
+  glLineWidth (2.0);
+  scale ();
+  glColor3f (0.0, 0.0, 0.0);
+
+  glBegin (GL_LINE_STRIP);
+  glVertex2f (0.0, 0.0);
+  glVertex2f (settings.totalCount, 0.0);
+  glEnd ();
+
+  glBegin (GL_LINE_STRIP);
+  glVertex2f (0.0, currentMin);
+  glVertex2f (0.0, currentMax);
+  glEnd ();
+
+  glLineWidth (1.0);
+
+  glPopMatrix ();
 }
 
 /**
@@ -163,12 +203,32 @@ Viewer::loop ()
 void
 Viewer::redraw ()
 {
-	glClearColor (0, 0, 0, 0);
+	glClearColor (1.0, 1.0, 1.0, 0);
 	glClear (GL_COLOR_BUFFER_BIT);
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
 
-	drawFile (settings.filePath[curFileIndex].c_str ());
+  if (settings.doUseInitialScale || settings.doUseManualScale)
+  {
+    currentMin = initialMin;
+    currentMax = initialMax;
+  }
+  else
+  {
+    getMaxVals (settings.filePath[curFileIndex].c_str (), currentMin, currentMax);
+    if (!settings.filePath1.empty ())
+    {
+      getMaxVals (settings.filePath1[curFileIndex].c_str (), currentMin, currentMax);
+    }
+  }
+
+  drawAxes ();
+  drawFile (settings.filePath[curFileIndex].c_str (), 1.0, 0.0, 0.0);
+
+  if (!settings.filePath1.empty ())
+  {
+    drawFile (settings.filePath1[curFileIndex].c_str (), 0.0, 1.0, 0.0);
+  }
 
 	glutSwapBuffers ();
 
