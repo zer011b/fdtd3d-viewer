@@ -213,8 +213,8 @@ Viewer::scale ()
   }
   else if (settings.viewerDim == Dimension::D2)
   {
-    FPValue scaleX = settings.sizeX * 0.1;
-    FPValue scaleY = settings.sizeY * 0.1;
+    FPValue scaleX = settings.sizeX * 0.2;
+    FPValue scaleY = settings.sizeY * 0.2;
     glScalef (1.0 / (settings.sizeX + 2 * scaleX), 1.0 / (settings.sizeY + 2 * scaleY), 1.0);
     glTranslatef (scaleX, scaleY, 0.0);
   }
@@ -270,6 +270,30 @@ Viewer::drawAxes ()
       FPValue val = i*1.0/10.0;
       glColor3f (val, val, val);
       glRectd (-35.0, i*settings.sizeY/10.0, -5.0, (i+1)*settings.sizeY/10.0);
+    }
+
+    std::string str1 = std::to_string (currentMin);
+    //printf ("!! %s\n", str.c_str());
+    for (int cc = 0; cc < 10 && cc < str1.length (); ++cc)
+    {
+      glPushMatrix ();
+      glColor3f (1.0, 0.0, 0.0);
+      glTranslatef (-80+cc*20,-30,0);
+      glScalef (1.0 / 5, 1.0 / 5, 1.0);
+      glutStrokeCharacter(GLUT_STROKE_ROMAN, str1[cc]);
+      glPopMatrix ();
+    }
+
+    std::string str2 = std::to_string (currentMax);
+    //printf ("!! %s\n", str.c_str());
+    for (int cc = 0; cc < 10 && cc < str2.length (); ++cc)
+    {
+      glPushMatrix ();
+      glColor3f (1.0, 0.0, 0.0);
+      glTranslatef (-80+cc*20,500,0);
+      glScalef (1.0 / 5, 1.0 / 5, 1.0);
+      glutStrokeCharacter(GLUT_STROKE_ROMAN, str2[cc]);
+      glPopMatrix ();
     }
 
     glLineWidth (1.0);
