@@ -148,9 +148,6 @@ Settings::parseCmd (int argc, char **argv)
     }
     else if (strcmp (argv[i], "--2d") == 0)
     {
-      // TODO
-      printf ("Not implemented.\n");
-      return STATUS_FAIL;
       viewerDim = Dimension::D2;
     }
     else if (strcmp (argv[i], "--3d") == 0)

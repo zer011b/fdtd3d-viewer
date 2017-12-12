@@ -52,6 +52,29 @@ Viewer::getMaxVals (const char *filename, FPValue &out_min, FPValue &out_max)
         min = val;
       }
     }
+    else if (settings.viewerDim == Dimension::D2)
+    {
+      int posX;
+      int posY;
+      FPValue val;
+      int count = fscanf (f, "%d %d " FPMOD "\n", &posX, &posY, &val);
+      ASSERT (count == 3);
+
+      if (index == 0)
+      {
+        min = val;
+        max = val;
+      }
+
+      if (val > max)
+      {
+        max = val;
+      }
+      if (val < min)
+      {
+        min = val;
+      }
+    }
     else
     {
       UNREACHABLE;
@@ -62,7 +85,7 @@ Viewer::getMaxVals (const char *filename, FPValue &out_min, FPValue &out_max)
   {
     out_min = min;
   }
-  if (max < out_max)
+  if (max > out_max)
   {
     out_max = max;
   }
@@ -77,18 +100,18 @@ Viewer::drawFile (const char *filename, FPValue red, FPValue green, FPValue blue
 
   glPushMatrix (); /* GL_MODELVIEW is default */
 
-  scale ();
-
-  glColor3f (red, green, blue);
-
-  glBegin (GL_LINE_STRIP);
-
-  for (int index = 0; index < settings.totalCount; ++index)
+  if (settings.viewerDim == Dimension::D1)
   {
-    // TODO: add complex values case here
-    // TODO: add other dimensions
-    if (settings.viewerDim == Dimension::D1)
+    scale ();
+    glColor3f (red, green, blue);
+
+    glBegin (GL_LINE_STRIP);
+
+    for (int index = 0; index < settings.totalCount; ++index)
     {
+      // TODO: add complex values case here
+      // TODO: add other dimensions
+
       int posX;
       FPValue val;
       int count = fscanf (f, "%d " FPMOD "\n", &posX, &val);
@@ -98,13 +121,34 @@ Viewer::drawFile (const char *filename, FPValue red, FPValue green, FPValue blue
 
       glVertex2f (posX, val);
     }
-    else
+
+    glEnd ();
+  }
+  else if (settings.viewerDim == Dimension::D2)
+  {
+    scale ();
+
+    for (int index = 0; index < settings.totalCount; ++index)
     {
-      UNREACHABLE;
+      // TODO: add complex values case here
+      // TODO: add other dimensions
+      int posX;
+      int posY;
+      FPValue val;
+      int count = fscanf (f, "%d %d " FPMOD "\n", &posX, &posY, &val);
+      ASSERT (count == 3);
+
+      val = val / (currentMax-currentMin);
+      val = val > 0 ? val : -val;
+      glColor3f (val, val, val);
+      glRectd(posX-0.5, posY-0.5, posX+0.5, posY+0.5);
+      //glVertex2f (posX, posY);
     }
   }
-
-  glEnd ();
+  else
+  {
+    UNREACHABLE;
+  }
 
   glPopMatrix ();
 
@@ -167,6 +211,13 @@ Viewer::scale ()
     glScalef (1.0 / (settings.sizeX + 2 * scaleX), 1.0 / (currentMax - currentMin + 2 * scaleY), 1.0);
     glTranslatef (scaleX, - currentMin + scaleY, 0.0);
   }
+  else if (settings.viewerDim == Dimension::D2)
+  {
+    FPValue scaleX = settings.sizeX * 0.1;
+    FPValue scaleY = settings.sizeY * 0.1;
+    glScalef (1.0 / (settings.sizeX + 2 * scaleX), 1.0 / (settings.sizeY + 2 * scaleY), 1.0);
+    glTranslatef (scaleX, scaleY, 0.0);
+  }
   else
   {
     UNREACHABLE;
@@ -178,21 +229,55 @@ Viewer::drawAxes ()
 {
   glPushMatrix (); /* GL_MODELVIEW is default */
 
-  glLineWidth (2.0);
-  scale ();
-  glColor3f (0.0, 0.0, 0.0);
+  if (settings.viewerDim == Dimension::D1)
+  {
+    glLineWidth (2.0);
+    scale ();
+    glColor3f (0.0, 0.0, 0.0);
 
-  glBegin (GL_LINE_STRIP);
-  glVertex2f (0.0, 0.0);
-  glVertex2f (settings.totalCount, 0.0);
-  glEnd ();
+    glBegin (GL_LINE_STRIP);
+    glVertex2f (0.0, 0.0);
+    glVertex2f (settings.totalCount, 0.0);
+    glEnd ();
 
-  glBegin (GL_LINE_STRIP);
-  glVertex2f (0.0, currentMin);
-  glVertex2f (0.0, currentMax);
-  glEnd ();
+    glBegin (GL_LINE_STRIP);
+    glVertex2f (0.0, currentMin);
+    glVertex2f (0.0, currentMax);
+    glEnd ();
 
-  glLineWidth (1.0);
+    glLineWidth (1.0);
+  }
+  else if (settings.viewerDim == Dimension::D2)
+  {
+    glLineWidth (2.0);
+    scale ();
+    // glColor3f (0.0, 0.0, 0.0);
+    //
+    // glBegin (GL_LINE_STRIP);
+    // glVertex2f (-35.0, 0.0);
+    // glVertex2f (-5.0, 0.0);
+    // glVertex2f (-5.0, settings.sizeY);
+    // glVertex2f (-35.0, settings.sizeY);
+    // glVertex2f (-35.0, 0.0);
+    // glEnd ();
+
+    for (int i = 0; i < 9; ++i)
+    {
+      // glBegin (GL_LINE_STRIP);
+      // glVertex2f (-35.0, i*settings.sizeY / 10);
+      // glVertex2f (-5.0, i*settings.sizeY / 10);
+      // glEnd ();
+      FPValue val = i*1.0/10.0;
+      glColor3f (val, val, val);
+      glRectd (-35.0, i*settings.sizeY/10.0, -5.0, (i+1)*settings.sizeY/10.0);
+    }
+
+    glLineWidth (1.0);
+  }
+  else
+  {
+    UNREACHABLE;
+  }
 
   glPopMatrix ();
 }
